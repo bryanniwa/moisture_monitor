@@ -1,12 +1,13 @@
-mod led_controller;
+mod adc;
+
+use std::{thread, time};
+
+const ADC_PATH: &str = "/sys/bus/iio/devices/iio:device0/in_voltage0_raw";
 
 fn main() {
-    let led = led_controller::Led::Led0;
-    let led1 = led_controller::Led::Led1;
-    let led2 = led_controller::Led::Led2;
-    let led3 = led_controller::Led::Led3;
-    led_controller::turn_on_led(&led);
-    led_controller::turn_on_led(&led1);
-    led_controller::turn_on_led(&led2);
-    led_controller::turn_on_led(&led3)
+    loop {
+        let adc_val = adc::read_adc(ADC_PATH);
+        println!("ADC: {}", adc_val);
+        thread::sleep(time::Duration::from_secs(1))
+    }
 }

@@ -3,5 +3,5 @@
 version = 3
 
 [[package]]
-name = "moisture_monitor"
+name = "plant_health_monitor"
 version = "0.1.0"

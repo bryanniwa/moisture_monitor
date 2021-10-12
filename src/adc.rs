@@ -14,18 +14,18 @@ mod tests {
     use std::fs;
     use std::panic;
 
-    const FILENAME: &str = "test.txt";
-
     #[test]
     fn successful_read() {
-        use::std::io::Write;
+        use std::io::Write;
 
-        let mut file = fs::File::create(FILENAME).unwrap();
+        let filename = "test.txt";
+
+        let mut file = fs::File::create(filename).unwrap();
         file.write(b"1234").unwrap();
 
-        let res = read_adc(FILENAME);
+        let res = read_adc(filename);
         
-        fs::remove_file(FILENAME).unwrap();
+        fs::remove_file(filename).unwrap();
 
         assert_eq!(1234, res)
     }
@@ -33,24 +33,25 @@ mod tests {
     #[test]
     #[should_panic]
     fn file_does_not_exist() {
-        read_adc(FILENAME);
+        read_adc("test2.txt");
     }
 
     #[test]
-    #[should_panic]
     fn wrong_file_permissions() {
         use std::os::unix::fs::PermissionsExt;
 
-        fs::File::create(FILENAME).unwrap();
-        let mut perms = fs::metadata(FILENAME).unwrap().permissions();
+        let filename = "test3.txt";
+
+        fs::File::create(filename).unwrap();
+        let mut perms = fs::metadata(filename).unwrap().permissions();
         perms.set_mode(0o000);
 
         let res = panic::catch_unwind(|| {
-            read_adc(FILENAME)
+            read_adc(filename)
         });
 
         perms.set_mode(00644);
-        fs::remove_file(FILENAME).unwrap();
+        fs::remove_file(filename).unwrap();
 
         assert!(res.is_err())
     }

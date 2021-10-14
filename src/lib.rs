@@ -11,7 +11,10 @@ pub fn run() {
 fn check_potentiometer() {
     loop {
         let adc_val = adc::read_adc(POTENTIOMETER);
-        println!("ADC: {}", adc_val);
+        match adc_val {
+            Ok(v) => println!("ADC: {}", v),
+            Err(_) => println!("Problem reading adc file")
+        }
         thread::sleep(time::Duration::from_secs(1))
     }
 }

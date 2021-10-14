@@ -1,18 +1,16 @@
 use std::fs;
+use std::error::Error;
 
-pub fn read_adc(path: &str) -> u64 {
-    let adc_value = fs::read_to_string(path).expect("Unable to read ADC file");
-    adc_value
-        .trim()
-        .parse::<u64>()
-        .unwrap()
+pub fn read_adc(path: &str) -> Result<u64, Box<dyn Error>> {
+    let adc_value = fs::read_to_string(path)?;
+    let res = adc_value.trim().parse::<u64>()?;
+    Ok(res)
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
     use std::fs;
-    use std::panic;
 
     #[test]
     fn successful_read() {
@@ -23,17 +21,16 @@ mod tests {
         let mut file = fs::File::create(filename).unwrap();
         file.write(b"1234").unwrap();
 
-        let res = read_adc(filename);
+        let res = read_adc(filename).unwrap();
         
         fs::remove_file(filename).unwrap();
 
-        assert_eq!(1234, res)
+        assert_eq!(1234, res, "adc value should read 1234")
     }
 
     #[test]
-    #[should_panic]
     fn file_does_not_exist() {
-        read_adc("test2.txt");
+        assert!(read_adc("test2.txt").is_err(), "adc file should not exist")
     }
 
     #[test]
@@ -46,13 +43,11 @@ mod tests {
         let mut perms = fs::metadata(filename).unwrap().permissions();
         perms.set_mode(0o000);
 
-        let res = panic::catch_unwind(|| {
-            read_adc(filename)
-        });
+        let res = read_adc(filename);
 
         perms.set_mode(00644);
         fs::remove_file(filename).unwrap();
 
-        assert!(res.is_err())
+        assert!(res.is_err(), "adc file should have improper permissions")
     }
 }
